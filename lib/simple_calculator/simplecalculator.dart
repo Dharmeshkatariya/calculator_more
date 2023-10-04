@@ -1,55 +1,48 @@
 // // import 'package:flutter/material.dart';
+// // import 'package:math_expressions/math_expressions.dart';
 // //
-// // class Calculator extends StatefulWidget {
-// //   @override
-// //   _CalculatorState createState() => _CalculatorState();
+// // void main() {
+// //   runApp(MaterialApp(
+// //     home: SimpleCal(),
+// //   ));
 // // }
 // //
-// // class _CalculatorState extends State<Calculator> {
-// //   String output = "0";
+// // class SimpleCal extends StatefulWidget {
+// //   @override
+// //   _SimpleCalState createState() => _SimpleCalState();
+// // }
+// //
+// // class _SimpleCalState extends State<SimpleCal> {
+// //   String expression = "";
 // //   String _output = "0";
-// //   double num1 = 0.0;
-// //   double num2 = 0.0;
-// //   String operand = "";
 // //
 // //   buttonPressed(String buttonText) {
 // //     if (buttonText == "C") {
-// //       _output = "0";
-// //       num1 = 0.0;
-// //       num2 = 0.0;
-// //       operand = "";
-// //     } else if (buttonText == "+" || buttonText == "-" || buttonText == "x" || buttonText == "/") {
-// //       num1 = double.parse(output);
-// //       operand = buttonText;
-// //       _output = "0";
+// //       setState(() {
+// //         expression = "";
+// //         _output = "0";
+// //       });
 // //     } else if (buttonText == "=") {
-// //       num2 = double.parse(output);
-// //       if (operand == "+") {
-// //         _output = (num1 + num2).toString();
-// //       }
-// //       if (operand == "-") {
-// //         _output = (num1 - num2).toString();
-// //       }
-// //       if (operand == "x") {
-// //         _output = (num1 * num2).toString();
-// //       }
-// //       if (operand == "/") {
-// //         if (num2 != 0) {
-// //           _output = (num1 / num2).toString();
-// //         } else {
+// //       try {
+// //         Parser p = Parser();
+// //         // Replace 'x' with '*' for multiplication
+// //         expression = expression.replaceAll('x', '*');
+// //         Expression exp = p.parse(expression);
+// //         ContextModel cm = ContextModel();
+// //         final result = exp.evaluate(EvaluationType.REAL, cm);
+// //         setState(() {
+// //           _output = result.toString();
+// //         });
+// //       } catch (e) {
+// //         setState(() {
 // //           _output = "Error";
-// //         }
+// //         });
 // //       }
-// //       num1 = 0.0;
-// //       num2 = 0.0;
-// //       operand = "";
 // //     } else {
-// //       _output += buttonText;
+// //       setState(() {
+// //         expression += buttonText;
+// //       });
 // //     }
-// //
-// //     setState(() {
-// //       output = double.parse(_output).toStringAsFixed(2);
-// //     });
 // //   }
 // //
 // //   Widget buildButton(String buttonText) {
@@ -68,7 +61,7 @@
 // //   Widget build(BuildContext context) {
 // //     return Scaffold(
 // //       appBar: AppBar(
-// //         title: Text('Calculator'),
+// //         title: Text('SimpleCal'),
 // //         backgroundColor: Colors.blue,
 // //       ),
 // //       body: Container(
@@ -78,7 +71,15 @@
 // //               alignment: Alignment.centerRight,
 // //               padding: EdgeInsets.symmetric(vertical: 24.0, horizontal: 12.0),
 // //               child: Text(
-// //                 output,
+// //                 expression.isEmpty ? " " : expression,
+// //                 style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+// //               ),
+// //             ),
+// //             Container(
+// //               alignment: Alignment.centerRight,
+// //               padding: EdgeInsets.symmetric(vertical: 24.0, horizontal: 12.0),
+// //               child: Text(
+// //                 _output,
 // //                 style: TextStyle(fontSize: 48.0, fontWeight: FontWeight.bold),
 // //               ),
 // //             ),
@@ -100,7 +101,7 @@
 // //                     buildButton("4"),
 // //                     buildButton("5"),
 // //                     buildButton("6"),
-// //                     buildButton("x"),
+// //                     buildButton("x"), // Use 'x' for multiplication
 // //                   ],
 // //                 ),
 // //                 Row(
@@ -121,6 +122,8 @@
 // //                 ),
 // //                 Row(
 // //                   children: [
+// //                     buildButton("("),
+// //                     buildButton(")"),
 // //                     buildButton("C"),
 // //                     buildButton("="),
 // //                   ],
@@ -134,21 +137,31 @@
 // //   }
 // // }
 // import 'package:flutter/material.dart';
+// import 'package:math_expressions/math_expressions.dart';
 //
-// void main() {
-//   runApp(MaterialApp(
-//     home: Calculator(),
-//   ));
-// }
+// import 'cal_history.dart';
 //
-// class Calculator extends StatefulWidget {
+// class SimpleCal extends StatefulWidget {
 //   @override
-//   _CalculatorState createState() => _CalculatorState();
+//   _SimpleCalState createState() => _SimpleCalState();
 // }
 //
-// class _CalculatorState extends State<Calculator> {
+// class _SimpleCalState extends State<SimpleCal> {
 //   String expression = "";
 //   String _output = "0";
+//   List<HistoryItem> historyItems = [];
+//
+//   void addToHistory(String expression, String result) {
+//     final timestamp = DateTime.now();
+//     final historyItem = HistoryItem(
+//       expression: expression,
+//       result: result,
+//       timestamp: timestamp,
+//     );
+//     setState(() {
+//       historyItems.insert(0, historyItem); // Insert at the beginning of the list.
+//     });
+//   }
 //
 //   buttonPressed(String buttonText) {
 //     if (buttonText == "C") {
@@ -158,11 +171,16 @@
 //       });
 //     } else if (buttonText == "=") {
 //       try {
-//         // Calculate the result of the expression
-//         final result = eval(expression);
+//         Parser p = Parser();
+//         // Replace 'x' with '*' for multiplication
+//         expression = expression.replaceAll('x', '*');
+//         Expression exp = p.parse(expression);
+//         ContextModel cm = ContextModel();
+//         final result = exp.evaluate(EvaluationType.REAL, cm).toString();
 //         setState(() {
-//           _output = result.toString();
-//           expression = "$expression = $_output";
+//           _output = result;
+//           addToHistory(expression, result) ;
+//           // calculationHistory.add("$expression = $result");
 //         });
 //       } catch (e) {
 //         setState(() {
@@ -173,32 +191,6 @@
 //       setState(() {
 //         expression += buttonText;
 //       });
-//     }
-//   }
-//
-//   // Evaluate the expression
-//   double eval(String expression) {
-//     try {
-//       // Remove spaces and replace 'x' with '*' for multiplication
-//       expression = expression.replaceAll(' ', '').replaceAll('x', '*');
-//       final result = double.parse(evalExpression(expression));
-//       return result;
-//     } catch (e) {
-//       throw Exception("Invalid expression");
-//     }
-//   }
-//
-//   // Recursively evaluate the expression
-//   String evalExpression(String expression) {
-//     if (!expression.contains("(") && !expression.contains(")")) {
-//       return expression;
-//     } else {
-//       final start = expression.lastIndexOf("(");
-//       final end = expression.indexOf(")", start);
-//       final inner = expression.substring(start + 1, end);
-//       final value = eval(inner);
-//       final newExpression = expression.replaceRange(start, end + 1, value.toString());
-//       return evalExpression(newExpression);
 //     }
 //   }
 //
@@ -217,9 +209,38 @@
 //   @override
 //   Widget build(BuildContext context) {
 //     return Scaffold(
+//       // appBar: AppBar(
+//       //   title: Text('SimpleCal'),
+//       //   backgroundColor: Colors.blue,
+//       //   actions: [
+//       //     IconButton(
+//       //       icon: Icon(Icons.history),
+//       //       onPressed: () {
+//       //         Navigator.push(
+//       //           context,
+//       //           MaterialPageRoute(
+//       //             builder: (context) => HistoryScreen(history: calculationHistory),
+//       //           ),
+//       //         );
+//       //       },
+//       //     ),
+//       //   ],
+//       // ),
 //       appBar: AppBar(
 //         title: Text('Calculator'),
-//         backgroundColor: Colors.blue,
+//         actions: [
+//           IconButton(
+//             icon: Icon(Icons.history),
+//             onPressed: () {
+//               Navigator.push(
+//                 context,
+//                 MaterialPageRoute(
+//                   builder: (context) => HistoryView(historyItems: historyItems),
+//                 ),
+//               );
+//             },
+//           ),
+//         ],
 //       ),
 //       body: Container(
 //         child: Column(
@@ -258,7 +279,7 @@
 //                     buildButton("4"),
 //                     buildButton("5"),
 //                     buildButton("6"),
-//                     buildButton("x"),
+//                     buildButton("x"), // Use 'x' for multiplication
 //                   ],
 //                 ),
 //                 Row(
@@ -293,23 +314,105 @@
 //     );
 //   }
 // }
+// class HistoryItem {
+//   final String expression;
+//   final String result;
+//   final DateTime timestamp;
+//
+//   HistoryItem({
+//     required this.expression,
+//     required this.result,
+//     required this.timestamp,
+//   });
+// }
+//
+//
+//
+// class HistoryView extends StatefulWidget {
+//   final List<HistoryItem> historyItems;
+//
+//   HistoryView({required this.historyItems});
+//
+//   @override
+//   _HistoryViewState createState() => _HistoryViewState();
+// }
+//
+// class _HistoryViewState extends State<HistoryView> {
+//   bool isAscending = true;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     // Sort the history items based on timestamp and order.
+//     final sortedItems = List<HistoryItem>.from(widget.historyItems);
+//     sortedItems.sort((a, b) => isAscending ? a.timestamp.compareTo(b.timestamp) : b.timestamp.compareTo(a.timestamp));
+//
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('History'),
+//         actions: [
+//           IconButton(
+//             icon: Icon(Icons.sort),
+//             onPressed: () {
+//               setState(() {
+//                 isAscending = !isAscending;
+//               });
+//             },
+//           ),
+//         ],
+//       ),
+//       body: ListView.builder(
+//         itemCount: sortedItems.length,
+//         itemBuilder: (context, index) {
+//           final item = sortedItems[index];
+//           final formattedTimestamp = "${item.timestamp.day} ${_getMonthName(item.timestamp.month)} ${item.timestamp.year}";
+//           return ListTile(
+//             title: Text(item.expression),
+//             subtitle: Text('Result: ${item.result}  Date: $formattedTimestamp'),
+//           );
+//         },
+//       ),
+//     );
+//   }
+//
+//   String _getMonthName(int month) {
+//     const monthNames = [
+//       'January', 'February', 'March', 'April', 'May', 'June',
+//       'July', 'August', 'September', 'October', 'November', 'December'
+//     ];
+//     return monthNames[month - 1];
+//   }
+// }
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
 
 void main() {
   runApp(MaterialApp(
-    home: Calculator(),
+    home: SimpleCal(),
   ));
 }
 
-class Calculator extends StatefulWidget {
+class SimpleCal extends StatefulWidget {
   @override
-  _CalculatorState createState() => _CalculatorState();
+  _SimpleCalState createState() => _SimpleCalState();
 }
 
-class _CalculatorState extends State<Calculator> {
+class _SimpleCalState extends State<SimpleCal> {
   String expression = "";
   String _output = "0";
+  List<HistoryItem> historyItems = [];
+  double memory = 0.0;
+
+  void addToHistory(String expression, String result) {
+    final timestamp = DateTime.now();
+    final historyItem = HistoryItem(
+      expression: expression,
+      result: result,
+      timestamp: timestamp,
+    );
+    setState(() {
+      historyItems.insert(0, historyItem);
+    });
+  }
 
   buttonPressed(String buttonText) {
     if (buttonText == "C") {
@@ -320,17 +423,31 @@ class _CalculatorState extends State<Calculator> {
     } else if (buttonText == "=") {
       try {
         Parser p = Parser();
+        expression = expression.replaceAll('x', '*');
         Expression exp = p.parse(expression);
         ContextModel cm = ContextModel();
-        final result = exp.evaluate(EvaluationType.REAL, cm);
+        final result = exp.evaluate(EvaluationType.REAL, cm).toString();
         setState(() {
-          _output = result.toString();
+          _output = result;
+          addToHistory(expression, result);
         });
       } catch (e) {
         setState(() {
           _output = "Error";
         });
       }
+    } else if (buttonText == "M+") {
+      setState(() {
+        memory += double.parse(_output);
+      });
+    } else if (buttonText == "M-") {
+      setState(() {
+        memory -= double.parse(_output);
+      });
+    } else if (buttonText == "MR") {
+      setState(() {
+        _output = memory.toString();
+      });
     } else {
       setState(() {
         expression += buttonText;
@@ -355,7 +472,19 @@ class _CalculatorState extends State<Calculator> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Calculator'),
-        backgroundColor: Colors.blue,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.history),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HistoryView(historyItems: historyItems),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Container(
         child: Column(
@@ -421,11 +550,84 @@ class _CalculatorState extends State<Calculator> {
                     buildButton("="),
                   ],
                 ),
+                Row(
+                  children: [
+                    buildButton("M+"),
+                    buildButton("M-"),
+                    buildButton("MR"),
+                  ],
+                ),
               ],
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+class HistoryItem {
+  final String expression;
+  final String result;
+  final DateTime timestamp;
+
+  HistoryItem({
+    required this.expression,
+    required this.result,
+    required this.timestamp,
+  });
+}
+
+class HistoryView extends StatefulWidget {
+  final List<HistoryItem> historyItems;
+
+  HistoryView({required this.historyItems});
+
+  @override
+  _HistoryViewState createState() => _HistoryViewState();
+}
+
+class _HistoryViewState extends State<HistoryView> {
+  bool isAscending = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final sortedItems = List<HistoryItem>.from(widget.historyItems);
+    sortedItems.sort((a, b) => isAscending ? a.timestamp.compareTo(b.timestamp) : b.timestamp.compareTo(a.timestamp));
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('History'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.sort),
+            onPressed: () {
+              setState(() {
+                isAscending = !isAscending;
+              });
+            },
+          ),
+        ],
+      ),
+      body: ListView.builder(
+        itemCount: sortedItems.length,
+        itemBuilder: (context, index) {
+          final item = sortedItems[index];
+          final formattedTimestamp = "${item.timestamp.day} ${_getMonthName(item.timestamp.month)} ${item.timestamp.year}";
+          return ListTile(
+            title: Text(item.expression),
+            subtitle: Text('Result: ${item.result}  Date: $formattedTimestamp'),
+          );
+        },
+      ),
+    );
+  }
+
+  String _getMonthName(int month) {
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return monthNames[month - 1];
   }
 }

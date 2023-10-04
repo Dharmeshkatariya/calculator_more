@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:more_calculator_app_example/simplecalculator.dart';
+import 'package:more_calculator_app_example/simple_calculator/scientific_calculator.dart';
+import 'package:more_calculator_app_example/tip_cal.dart';
 
-import 'age_calculator/age_calculator.dart';
-import 'calculator.dart';
-import 'conversion.dart';
+import 'date_calculator.dart';
+import 'length cal.dart';
+import 'mortage_cal.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,8 +37,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home:SimpleCal ()
+      home:TipCalculator ()
     );
   }
 }
+
+
+
+
 
